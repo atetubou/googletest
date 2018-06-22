@@ -478,7 +478,8 @@ std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
 // works well enough for matching test names, which are short.
 bool UnitTestOptions::PatternMatchesString(const char *pattern,
                                            const char *str) {
-  switch (*pattern) {
+  const char ch = *pattern;
+  switch (ch) {
     case '\0':
     case ':':  // Either ':' or '\0' marks the end of the pattern.
       return *str == '\0';
@@ -488,7 +489,7 @@ bool UnitTestOptions::PatternMatchesString(const char *pattern,
       return (*str != '\0' && PatternMatchesString(pattern, str + 1)) ||
           PatternMatchesString(pattern + 1, str);
     default:  // Non-special character.  Matches itself.
-      return *pattern == *str &&
+      return ch == *str &&
           PatternMatchesString(pattern + 1, str + 1);
   }
 }
@@ -518,30 +519,37 @@ bool UnitTestOptions::MatchesFilter(
 // name and the test name.
 bool UnitTestOptions::FilterMatchesTest(const std::string &test_case_name,
                                         const std::string &test_name) {
-  const std::string& full_name = test_case_name + "." + test_name.c_str();
+  std::string full_name;
+  full_name.reserve(test_case_name.size() + 1  + test_name.size());
+  full_name += test_case_name;
+  full_name += '.';
+  full_name += test_name;
 
   // Split --gtest_filter at '-', if there is one, to separate into
   // positive filter and negative filter portions
   const char* const p = GTEST_FLAG(filter).c_str();
   const char* const dash = strchr(p, '-');
-  std::string positive;
-  std::string negative;
+  const char* positive = "";
+  const char* negative = "";
+  std::string positive_buf;
+
   if (dash == NULL) {
     positive = GTEST_FLAG(filter).c_str();  // Whole string is a positive filter
-    negative = "";
   } else {
-    positive = std::string(p, dash);   // Everything up to the dash
-    negative = std::string(dash + 1);  // Everything after the dash
-    if (positive.empty()) {
+    positive_buf = std::string(p, dash);   // Everything up to the dash
+    negative = dash + 1;  // Everything after the dash
+    if (positive_buf.empty()) {
       // Treat '-test1' as the same as '*-test1'
       positive = kUniversalFilter;
+    } else {
+      positive = positive_buf.c_str();
     }
   }
 
   // A filter is a colon-separated list of patterns.  It matches a
   // test if any pattern in it matches the test.
-  return (MatchesFilter(full_name, positive.c_str()) &&
-          !MatchesFilter(full_name, negative.c_str()));
+  return (MatchesFilter(full_name, positive) &&
+          !MatchesFilter(full_name, negative));
 }
 
 #if GTEST_HAS_SEH
