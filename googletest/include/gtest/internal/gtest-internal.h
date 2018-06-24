@@ -484,7 +484,7 @@ typedef void (*SetUpTestCaseFunc)();
 typedef void (*TearDownTestCaseFunc)();
 
 struct CodeLocation {
-  CodeLocation(const std::string& a_file, int a_line)
+  CodeLocation(const char* a_file, int a_line)
       : file(a_file), line(a_line) {}
 
   std::string file;
