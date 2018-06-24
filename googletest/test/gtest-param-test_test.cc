@@ -620,13 +620,14 @@ class TestGenerationEnvironment : public ::testing::Environment {
     // If all MultipleTestGenerationTest tests have been de-selected
     // by the filter flag, the following checks make no sense.
     bool perform_check = false;
+    std::string buf;
 
     for (int i = 0; i < kExpectedCalls; ++i) {
       Message msg;
       msg << "TestsExpandedAndRun/" << i;
       if (UnitTestOptions::FilterMatchesTest(
-             "TestExpansionModule/MultipleTestGenerationTest",
-              msg.GetString().c_str())) {
+              "TestExpansionModule/MultipleTestGenerationTest",
+              msg.GetString().c_str(), &buf)) {
         perform_check = true;
       }
     }
@@ -684,13 +685,13 @@ class TestGenerationTest : public TestWithParam<int> {
 
   static void SetUpTestCase() {
     bool all_tests_in_test_case_selected = true;
-
+    std::string buf;
     for (int i = 0; i < PARAMETER_COUNT; ++i) {
       Message test_name;
       test_name << "TestsExpandedAndRun/" << i;
       if ( !UnitTestOptions::FilterMatchesTest(
                 "TestExpansionModule/MultipleTestGenerationTest",
-                test_name.GetString())) {
+                test_name.GetString().c_str(), &buf)) {
         all_tests_in_test_case_selected = false;
       }
     }

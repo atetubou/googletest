@@ -523,13 +523,13 @@ bool UnitTestOptions::MatchesFilter(
 
 // Returns true iff the user-specified filter matches the test case
 // name and the test name.
-bool UnitTestOptions::FilterMatchesTest(const std::string &test_case_name,
-                                        const std::string &test_name) {
-  std::string full_name;
-  full_name.reserve(test_case_name.size() + 1  + test_name.size());
-  full_name += test_case_name;
-  full_name += '.';
-  full_name += test_name;
+bool UnitTestOptions::FilterMatchesTest(const char* test_case_name,
+                                        const char* test_name,
+                                        std::string* full_name_buf) {
+  full_name_buf->clear();
+  *full_name_buf += test_case_name;;
+  *full_name_buf += '.';
+  *full_name_buf += test_name;
 
   // Split --gtest_filter at '-', if there is one, to separate into
   // positive filter and negative filter portions
@@ -554,8 +554,8 @@ bool UnitTestOptions::FilterMatchesTest(const std::string &test_case_name,
 
   // A filter is a colon-separated list of patterns.  It matches a
   // test if any pattern in it matches the test.
-  return (MatchesFilter(full_name, positive) &&
-          !MatchesFilter(full_name, negative));
+  return (MatchesFilter(*full_name_buf, positive) &&
+          !MatchesFilter(*full_name_buf, negative));
 }
 
 #if GTEST_HAS_SEH
@@ -5235,6 +5235,17 @@ bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id) {
   return (test_id % total_shards) == shard_index;
 }
 
+bool IsDisabled(const string& name) {
+  static const char kDISABLED_[] = "DISABLED_";
+  if (name.size() >= strlen(kDISABLED_) &&
+      !strncmp(name.c_str(), kDISABLED_, strlen(kDISABLED_))) {
+    return true;
+  }
+
+  static const char kSLASH_DISABLED_[] = "/DISABLED_";
+  return name.find(kSLASH_DISABLED_, 0, strlen(kSLASH_DISABLED_)) != string::npos;
+}
+
 // Compares the name of each test with the user-specified filter to
 // decide whether the test should be run, then records the result in
 // each TestCase and TestInfo object.
@@ -5248,6 +5259,8 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   const Int32 shard_index = shard_tests == HONOR_SHARDING_PROTOCOL ?
       Int32FromEnvOrDie(kTestShardIndex, -1) : -1;
 
+  std::string buf;
+
   // num_runnable_tests are the number of tests that will
   // run across all shards (i.e., match filter and are not disabled).
   // num_selected_tests are the number of tests to be run on
@@ -5256,24 +5269,22 @@ int UnitTestImpl::FilterTests(ReactionToSharding shard_tests) {
   int num_selected_tests = 0;
   for (size_t i = 0; i < test_cases_.size(); i++) {
     TestCase* const test_case = test_cases_[i];
-    const std::string &test_case_name = test_case->name();
+    const char* test_case_name = test_case->name();
     test_case->set_should_run(false);
 
     for (size_t j = 0; j < test_case->test_info_list().size(); j++) {
       TestInfo* const test_info = test_case->test_info_list()[j];
-      const std::string test_name(test_info->name());
+      const char* test_name(test_info->name());
       // A test is disabled if test case name or test name matches
       // kDisableTestFilter.
-      const bool is_disabled =
-          internal::UnitTestOptions::MatchesFilter(test_case_name,
-                                                   kDisableTestFilter) ||
-          internal::UnitTestOptions::MatchesFilter(test_name,
-                                                   kDisableTestFilter);
+      const bool is_disabled = IsDisabled(test_case_name) || IsDisabled(test_name);
+
       test_info->is_disabled_ = is_disabled;
 
       const bool matches_filter =
           internal::UnitTestOptions::FilterMatchesTest(test_case_name,
-                                                       test_name);
+                                                       test_name,
+                                                       &buf);
       test_info->matches_filter_ = matches_filter;
 
       const bool is_runnable =
