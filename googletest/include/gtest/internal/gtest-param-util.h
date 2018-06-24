@@ -370,9 +370,10 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
 // integer test parameter index.
 template <class ParamType>
 std::string DefaultParamName(const TestParamInfo<ParamType>& info) {
-  Message name_stream;
-  name_stream << info.index;
-  return name_stream.GetString();
+  char buffer[20];
+  int written = snprintf(buffer, sizeof(buffer), "%zu", info.index);
+  GTEST_CHECK_(0 < written && written < sizeof(buffer));
+  return buffer;
 }
 
 // INTERNAL IMPLEMENTATION - DO NOT USE IN USER CODE.
