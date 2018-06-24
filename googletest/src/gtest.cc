@@ -5235,15 +5235,16 @@ bool ShouldRunTestOnShard(int total_shards, int shard_index, int test_id) {
   return (test_id % total_shards) == shard_index;
 }
 
-bool IsDisabled(const string& name) {
+bool IsDisabled(const char* name) {
+  size_t len = strlen(name);
   static const char kDISABLED_[] = "DISABLED_";
-  if (name.size() >= strlen(kDISABLED_) &&
-      !strncmp(name.c_str(), kDISABLED_, strlen(kDISABLED_))) {
+  if (len >= strlen(kDISABLED_) &&
+      !strncmp(name, kDISABLED_, strlen(kDISABLED_))) {
     return true;
   }
 
   static const char kSLASH_DISABLED_[] = "/DISABLED_";
-  return name.find(kSLASH_DISABLED_, 0, strlen(kSLASH_DISABLED_)) != string::npos;
+  return len >= strlen(kSLASH_DISABLED_) && strstr(name, kSLASH_DISABLED_) != NULL;
 }
 
 // Compares the name of each test with the user-specified filter to
