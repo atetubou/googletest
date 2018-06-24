@@ -751,12 +751,23 @@ class GTEST_API_ TestInfo {
       Test::TearDownTestCaseFunc tear_down_tc,
       internal::TestFactoryBase* factory);
 
+  friend TestInfo* internal::MakeAndRegisterTestInfoLessAlloc(
+      std::string* test_case_name,
+      std::string* name,
+      std::string* type_param,
+      std::string* value_param,
+      internal::CodeLocation code_location,
+      internal::TypeId fixture_class_id,
+      Test::SetUpTestCaseFunc set_up_tc,
+      Test::TearDownTestCaseFunc tear_down_tc,
+      internal::TestFactoryBase* factory);
+
   // Constructs a TestInfo object. The newly constructed instance assumes
   // ownership of the factory object.
-  TestInfo(const std::string& test_case_name,
-           const std::string& name,
-           const char* a_type_param,   // NULL if not a type-parameterized test
-           const char* a_value_param,  // NULL if not a value-parameterized test
+  TestInfo(std::string* test_case_name,
+           std::string* name,
+           std::string* a_type_param,   // NULL if not a type-parameterized test
+           std::string* a_value_param,  // NULL if not a value-parameterized test
            internal::CodeLocation a_code_location,
            internal::TypeId fixture_class_id,
            internal::TestFactoryBase* factory);
@@ -773,6 +784,13 @@ class GTEST_API_ TestInfo {
 
   static void ClearTestResult(TestInfo* test_info) {
     test_info->result_.Clear();
+  }
+
+  // TODO: Use move in c++11
+  static std::string move_string(std::string* a) {
+    std::string b;
+    b.swap(*a);
+    return b;
   }
 
   // These fields are immutable properties of the test.

@@ -89,7 +89,9 @@ class StreamingListenerTest : public Test {
   StreamingListenerTest()
       : fake_sock_writer_(new FakeSocketWriter),
         streamer_(fake_sock_writer_),
-        test_info_obj_("FooTest", "Bar", NULL, NULL,
+        foo_test("FooTest"),
+        bar("Bar"),
+        test_info_obj_(&foo_test, &bar, NULL, NULL,
                        CodeLocation(__FILE__, __LINE__), 0, NULL) {}
 
  protected:
@@ -98,6 +100,8 @@ class StreamingListenerTest : public Test {
   FakeSocketWriter* const fake_sock_writer_;
   StreamingListener streamer_;
   UnitTest unit_test_;
+  std::string foo_test;
+  std::string bar;
   TestInfo test_info_obj_;  // The name test_info_ was taken by testing::Test.
 };
 

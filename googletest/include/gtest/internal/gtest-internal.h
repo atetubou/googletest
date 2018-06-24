@@ -520,6 +520,19 @@ GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
     TearDownTestCaseFunc tear_down_tc,
     TestFactoryBase* factory);
 
+// This is the same with MakeAndRegisterTestInfo, but takes ownership of
+// std::string parameters.
+GTEST_API_ TestInfo* MakeAndRegisterTestInfoLessAlloc(
+    std::string* test_case_name,
+    std::string* name,
+    std::string* type_param,
+    std::string* value_param,
+    CodeLocation code_location,
+    TypeId fixture_class_id,
+    SetUpTestCaseFunc set_up_tc,
+    TearDownTestCaseFunc tear_down_tc,
+    TestFactoryBase* factory);
+
 // If *pstr starts with the given prefix, modifies *pstr to be right
 // past the prefix and returns true; otherwise leaves *pstr unchanged
 // and returns false.  None of pstr, *pstr, and prefix can be NULL.
