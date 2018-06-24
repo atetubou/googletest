@@ -2537,12 +2537,35 @@ TestInfo::TestInfo(std::string* a_test_case_name,
                    internal::CodeLocation a_code_location,
                    internal::TypeId fixture_class_id,
                    internal::TestFactoryBase* factory)
-    : test_case_name_(move_string(a_test_case_name)),
-      name_(move_string(a_name)),
-      has_type_param_(a_type_param != NULL),
-      type_param_(a_type_param ? move_string(a_type_param): std::string()),
-      has_value_param_(a_value_param != NULL),
-      value_param_(a_value_param ? move_string(a_value_param): std::string()),
+    : str_test_case_name_(move_string(a_test_case_name)),
+      ptr_test_case_name_(str_test_case_name_.c_str()),
+      str_name_(move_string(a_name)),
+      ptr_name_(str_name_.c_str()),
+      str_type_param_(a_type_param != NULL ? move_string(a_type_param): std::string()),
+      ptr_type_param_(a_type_param != NULL ? str_type_param_.c_str() : NULL),
+      str_value_param_(a_value_param != NULL ? move_string(a_value_param): std::string()),
+      ptr_value_param_(a_value_param != NULL ? str_value_param_.c_str() : NULL),
+      location_(a_code_location),
+      fixture_class_id_(fixture_class_id),
+      should_run_(false),
+      is_disabled_(false),
+      matches_filter_(false),
+      factory_(factory),
+      result_() {}
+
+// Constructs a TestInfo object. It assumes ownership of the test factory
+// object.
+TestInfo::TestInfo(const char* a_test_case_name,
+                   const char* a_name,
+                   const char* a_type_param,
+                   const char* a_value_param,
+                   internal::CodeLocation a_code_location,
+                   internal::TypeId fixture_class_id,
+                   internal::TestFactoryBase* factory)
+    : ptr_test_case_name_(a_test_case_name),
+      ptr_name_(a_name),
+      ptr_type_param_(a_type_param),
+      ptr_value_param_(a_value_param),
       location_(a_code_location),
       fixture_class_id_(fixture_class_id),
       should_run_(false),
@@ -2584,21 +2607,11 @@ TestInfo* MakeAndRegisterTestInfo(
     SetUpTestCaseFunc set_up_tc,
     TearDownTestCaseFunc tear_down_tc,
     TestFactoryBase* factory) {
-  std::string str_test_case_name(test_case_name);
-  std::string str_name(name);
-  std::string str_type_param;
-  if (type_param != NULL) {
-    str_type_param = type_param;
-  }
-  std::string str_value_param;
-  if (value_param != NULL) {
-    str_value_param = value_param;
-  }
-
-  return MakeAndRegisterTestInfoLessAlloc(
-      &str_test_case_name, &str_name, type_param == NULL ? NULL : &str_type_param,
-      value_param == NULL ? NULL : &str_value_param, code_location, fixture_class_id,
-      set_up_tc, tear_down_tc, factory);
+  TestInfo* const test_info =
+      new TestInfo(test_case_name, name, type_param, value_param,
+                   code_location, fixture_class_id, factory);
+  GetUnitTestImpl()->AddTestInfo(set_up_tc, tear_down_tc, test_info);
+  return test_info;
 }
 
 // This is the same with MakeAndRegisterTestInfo, but takes ownership of

@@ -632,11 +632,14 @@ class TypeParameterizedTest {
 
     // First, registers the first type-parameterized test in the type
     // list.
-    MakeAndRegisterTestInfo(
-        (std::string(prefix) + (prefix[0] == '\0' ? "" : "/") + case_name + "/"
-         + StreamableToString(index)).c_str(),
-        StripTrailingSpaces(GetPrefixUntilComma(test_names)).c_str(),
-        GetTypeName<Type>().c_str(),
+    std::string test_case_name(std::string(prefix) + (prefix[0] == '\0' ? "" : "/") + case_name + "/"
+                               + StreamableToString(index));
+    std::string name(StripTrailingSpaces(GetPrefixUntilComma(test_names)));
+    std::string type_param(GetTypeName<Type>());
+    MakeAndRegisterTestInfoLessAlloc(
+        &test_case_name,
+        &name,
+        &type_param,
         NULL,  // No value parameter.
         code_location,
         GetTypeId<FixtureClass>(),

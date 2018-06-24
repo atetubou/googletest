@@ -674,25 +674,25 @@ class GTEST_API_ TestInfo {
   ~TestInfo();
 
   // Returns the test case name.
-  const char* test_case_name() const { return test_case_name_.c_str(); }
+  const char* test_case_name() const {
+    return ptr_test_case_name_;
+  }
 
   // Returns the test name.
-  const char* name() const { return name_.c_str(); }
+  const char* name() const {
+    return ptr_name_;
+  }
 
   // Returns the name of the parameter type, or NULL if this is not a typed
   // or a type-parameterized test.
   const char* type_param() const {
-    if (has_type_param_)
-      return type_param_.c_str();
-    return NULL;
+    return ptr_type_param_;
   }
 
   // Returns the text representation of the value parameter, or NULL if this
   // is not a value-parameterized test.
   const char* value_param() const {
-    if (has_value_param_)
-      return value_param_.c_str();
-    return NULL;
+    return ptr_value_param_;
   }
 
   // Returns the file name where this test is defined.
@@ -772,6 +772,16 @@ class GTEST_API_ TestInfo {
            internal::TypeId fixture_class_id,
            internal::TestFactoryBase* factory);
 
+  // Constructs a TestInfo object. The newly constructed instance assumes
+  // ownership of the factory object.
+  TestInfo(const char* test_case_name,
+           const char* name,
+           const char* a_type_param,   // NULL if not a type-parameterized test
+           const char* a_value_param,  // NULL if not a value-parameterized test
+           internal::CodeLocation a_code_location,
+           internal::TypeId fixture_class_id,
+           internal::TestFactoryBase* factory);
+
   // Increments the number of death tests encountered in this test so
   // far.
   int increment_death_test_count() {
@@ -794,17 +804,19 @@ class GTEST_API_ TestInfo {
   }
 
   // These fields are immutable properties of the test.
-  const std::string test_case_name_;     // Test case name
-  const std::string name_;               // Test name
+  const std::string str_test_case_name_;     // Test case name
+  const char* ptr_test_case_name_;
+  const std::string str_name_;               // Test name
+  const char* ptr_name_;
   // Name of the parameter type, or NULL if this is not a typed or a
   // type-parameterized test.
-  const bool has_type_param_;
-  const std::string type_param_;
+  const std::string str_type_param_;
+  const char* ptr_type_param_;
 
   // Text representation of the value parameter, or NULL if this is not a
   // value-parameterized test.
-  const bool has_value_param_;
-  const std::string value_param_;
+  const std::string str_value_param_;
+  const char* ptr_value_param_;
 
   internal::CodeLocation location_;
   const internal::TypeId fixture_class_id_;   // ID of the test fixture class
