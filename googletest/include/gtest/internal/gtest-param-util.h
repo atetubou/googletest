@@ -538,17 +538,9 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
   // instance of a ParameterizedTestCaseInfoBase derived class.
   // UnitTest has a guard to prevent from calling this method more then once.
   virtual void RegisterTests() {
-    std::string param_name;
-    std::string name;
-    std::string test_case_name;
-
     for (typename TestInfoContainer::iterator test_it = tests_.begin();
          test_it != tests_.end(); ++test_it) {
       linked_ptr<TestInfo> test_info = *test_it;
-      name.clear();
-      name += test_info->test_base_name;
-      name += '/';
-
       for (typename InstantiationContainer::iterator gen_it =
                instantiations_.begin(); gen_it != instantiations_.end();
                ++gen_it) {
@@ -558,8 +550,9 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
         const char* file = gen_it->file;
         int line = gen_it->line;
 
-        test_case_name.clear();
+        std::string test_case_name;
         if ( !instantiation_name.empty() ) {
+          test_case_name.reserve(instantiation_name.size() + 1 +test_info->test_case_base_name.size());
           test_case_name += instantiation_name ;
           test_case_name += '/';
         }
@@ -570,9 +563,7 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
         for (typename ParamGenerator<ParamType>::iterator param_it =
                  generator.begin(), end = generator.end();
              param_it != end; ++param_it, ++i) {
-          param_name.clear();
-
-          param_name += name_func(
+          std::string param_name = name_func(
               TestParamInfo<ParamType>(*param_it, i));
 
           GTEST_CHECK_(IsValidParamName(param_name))
@@ -584,15 +575,19 @@ class ParameterizedTestCaseInfo : public ParameterizedTestCaseInfoBase {
               << "Duplicate parameterized test name '" << param_name
               << "', in " << file << " line " << line << std::endl;
 
-          // Shring name to hold test_info->test_base_name + '/'
-          name.resize(test_info->test_base_name.size() + 1);
-          name += param_name;
+          std::string test_name;
+          test_name.reserve(test_info->test_base_name.size() + 1 + param_name.size());
+          test_name += test_info->test_base_name;
+          test_name += '/';
+          test_name += param_name;
 
-          MakeAndRegisterTestInfo(
-              test_case_name.c_str(),
-              name.c_str(),
+          std::string test_case_name_a = test_case_name;
+          std::string param_value = PrintToString(*param_it);
+          MakeAndRegisterTestInfoLessAlloc(
+              &test_case_name_a,
+              &test_name,
               NULL,  // No type parameter.
-              PrintToString(*param_it).c_str(),
+              &param_value,
               code_location_,
               GetTestCaseTypeId(),
               TestCase::SetUpTestCase,

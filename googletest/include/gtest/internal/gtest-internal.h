@@ -487,12 +487,6 @@ struct CodeLocation {
   CodeLocation(const char* a_file, int a_line)
       : file(a_file), line(a_line) {}
 
-  // TODO: Replace std::move when switched to c++11.
-  swap(CodeLocation& other) {
-    std::swap(line, other.line);
-    file.swap(other.file);
-  }
-
   std::string file;
   int line;
 };
