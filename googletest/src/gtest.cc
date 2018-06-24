@@ -4916,16 +4916,16 @@ void UnitTestImpl::PostFlagParsingInit() {
 class TestCaseNameIs {
  public:
   // Constructor.
-  explicit TestCaseNameIs(const std::string& name)
+  explicit TestCaseNameIs(const char* const name)
       : name_(name) {}
 
   // Returns true iff the name of test_case matches name_.
   bool operator()(const TestCase* test_case) const {
-    return test_case != NULL && strcmp(test_case->name(), name_.c_str()) == 0;
+    return test_case != NULL && strcmp(test_case->name(), name_) == 0;
   }
 
  private:
-  std::string name_;
+  const char* const name_;
 };
 
 // Finds and returns a TestCase with the given name.  If one doesn't
