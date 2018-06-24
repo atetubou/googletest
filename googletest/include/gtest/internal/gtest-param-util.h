@@ -371,7 +371,7 @@ class ValuesInIteratorRangeGenerator : public ParamGeneratorInterface<T> {
 template <class ParamType>
 std::string DefaultParamName(const TestParamInfo<ParamType>& info) {
   char buffer[20];
-  int written = snprintf(buffer, sizeof(buffer), "%zu", info.index);
+  size_t written = snprintf(buffer, sizeof(buffer), "%zu", info.index);
   GTEST_CHECK_(0 < written && written < sizeof(buffer));
   return buffer;
 }

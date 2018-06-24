@@ -478,20 +478,26 @@ std::string UnitTestOptions::GetAbsolutePathToOutputFile() {
 // works well enough for matching test names, which are short.
 bool UnitTestOptions::PatternMatchesString(const char *pattern,
                                            const char *str) {
-  const char ch = *pattern;
-  switch (ch) {
-    case '\0':
-    case ':':  // Either ':' or '\0' marks the end of the pattern.
-      return *str == '\0';
-    case '?':  // Matches any single character.
-      return *str != '\0' && PatternMatchesString(pattern + 1, str + 1);
-    case '*':  // Matches any string (possibly empty) of characters.
-      return (*str != '\0' && PatternMatchesString(pattern, str + 1)) ||
-          PatternMatchesString(pattern + 1, str);
-    default:  // Non-special character.  Matches itself.
-      return ch == *str &&
-          PatternMatchesString(pattern + 1, str + 1);
+  while (true) {
+    char ch = *pattern;
+    switch (ch) {
+      case '\0':
+      case ':':  // Either ':' or '\0' marks the end of the pattern.
+        return *str == '\0';
+      case '?':  // Matches any single character.
+        return *str != '\0' && PatternMatchesString(pattern + 1, str + 1);
+      case '*':  // Matches any string (possibly empty) of characters.
+        return (*str != '\0' && PatternMatchesString(pattern, str + 1)) ||
+            PatternMatchesString(pattern + 1, str);
+      default:  // Non-special character.  Matches itself.
+        if (ch != *str) {
+          return false;
+        }
+        ++pattern;
+        ++str;
+    }
   }
+  return false;
 }
 
 bool UnitTestOptions::MatchesFilter(
