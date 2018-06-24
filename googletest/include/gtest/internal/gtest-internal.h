@@ -484,10 +484,10 @@ typedef void (*SetUpTestCaseFunc)();
 typedef void (*TearDownTestCaseFunc)();
 
 struct CodeLocation {
-  CodeLocation(const char* a_file, int a_line)
+  CodeLocation(const char* const a_file, int a_line)
       : file(a_file), line(a_line) {}
 
-  std::string file;
+  const char* const file;
   int line;
 };
 
@@ -676,7 +676,7 @@ class TypeParameterizedTestCase {
     if (!state->TestExists(test_name)) {
       fprintf(stderr, "Failed to get code location for test %s.%s at %s.",
               case_name, test_name.c_str(),
-              FormatFileLocation(code_location.file.c_str(),
+              FormatFileLocation(code_location.file,
                                  code_location.line).c_str());
       fflush(stderr);
       posix::Abort();

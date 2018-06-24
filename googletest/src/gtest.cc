@@ -2625,7 +2625,7 @@ void ReportInvalidTestCaseType(const char* test_case_name,
       << "probably rename one of the classes to put the tests into different\n"
       << "test cases.";
 
-  GTEST_LOG_(ERROR) << FormatFileLocation(code_location.file.c_str(),
+  GTEST_LOG_(ERROR) << FormatFileLocation(code_location.file,
                                           code_location.line)
                     << " " << errors.GetString();
 }

@@ -696,7 +696,7 @@ class GTEST_API_ TestInfo {
   }
 
   // Returns the file name where this test is defined.
-  const char* file() const { return location_.file.c_str(); }
+  const char* file() const { return location_.file; }
 
   // Returns the line where this test is defined.
   int line() const { return location_.line; }
