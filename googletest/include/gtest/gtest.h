@@ -682,16 +682,16 @@ class GTEST_API_ TestInfo {
   // Returns the name of the parameter type, or NULL if this is not a typed
   // or a type-parameterized test.
   const char* type_param() const {
-    if (type_param_.get() != NULL)
-      return type_param_->c_str();
+    if (has_type_param_)
+      return type_param_.c_str();
     return NULL;
   }
 
   // Returns the text representation of the value parameter, or NULL if this
   // is not a value-parameterized test.
   const char* value_param() const {
-    if (value_param_.get() != NULL)
-      return value_param_->c_str();
+    if (has_value_param_)
+      return value_param_.c_str();
     return NULL;
   }
 
@@ -798,10 +798,14 @@ class GTEST_API_ TestInfo {
   const std::string name_;               // Test name
   // Name of the parameter type, or NULL if this is not a typed or a
   // type-parameterized test.
-  const internal::scoped_ptr<const ::std::string> type_param_;
+  const bool has_type_param_;
+  const std::string type_param_;
+
   // Text representation of the value parameter, or NULL if this is not a
   // value-parameterized test.
-  const internal::scoped_ptr<const ::std::string> value_param_;
+  const bool has_value_param_;
+  const std::string value_param_;
+
   internal::CodeLocation location_;
   const internal::TypeId fixture_class_id_;   // ID of the test fixture class
   bool should_run_;                 // True iff this test should run
